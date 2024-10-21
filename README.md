@@ -1,2 +1,2 @@
 # frontend-Prueba Técnica-Cristian Hernández
- El Juego de la Ruleta, prueba Tecnica UNILINK
+ El Juego de la Ruleta, Prueba técnica de UNILINK
