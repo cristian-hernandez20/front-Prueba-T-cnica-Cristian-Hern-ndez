@@ -1,2 +1,2 @@
-# front-Prueba-T-cnica-Cristian-Hern-ndez
+# front-Prueba Técnica-Cristian Hernández
  El Juego de la Ruleta, prueba Tecnica UNILINK
