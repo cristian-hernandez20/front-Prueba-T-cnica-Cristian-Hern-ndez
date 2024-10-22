@@ -15,14 +15,14 @@ export const apiAxios = async ({
   params,
   url,
 }) => {
-  const full_url = `http://localhost:${port}${process.env.API}${url}`;
+  const fullUrl = `http://${window.location.hostname}:${port}${process.env.API}${url}`;
   let config = {
     headers: { ...getHeaders(), ...header },
     params: { ...params },
     responseType,
     method,
     data,
-    url: full_url,
+    url: fullUrl,
     validateStatus: function (status) {
       return status >= 200 && status < 400;
     },
