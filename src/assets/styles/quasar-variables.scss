@@ -1,0 +1,86 @@
+$primary: #023a00;
+$secondary: #0b2863;
+$terceary: #0b2863;
+$accent: #09696e;
+$dark: #535358;
+$positive: #21ba45;
+$negative: #c10015;
+$info: #123d7d;
+$warning: #f2c037;
+$background: #ffffff;
+
+@font-face {
+  font-family: Quicksand-Medium;
+  src: url(@/assets/fonts/Quicksand-Medium.ttf);
+}
+@font-face {
+  font-family: Quicksand-Medium;
+  src: url(@/assets/fonts/Quicksand-Medium.ttf);
+}
+@font-face {
+  font-family: Quicksand-Light;
+  src: url(@/assets/fonts/Quicksand-Light.ttf);
+}
+@font-face {
+  font-family: Quicksand-Regular;
+  src: url(@/assets/fonts/Quicksand-Regular.ttf);
+}
+@font-face {
+  font-family: Quicksand-SemiBold;
+  src: url(@/assets/fonts/Quicksand-SemiBold.ttf);
+}
+@font-face {
+  font-family: Quicksand-Bold;
+  src: url(@/assets/fonts/Quicksand-Bold.ttf);
+}
+
+$font-primary: Quicksand-SemiBold, sans-serif;
+$font-secondary: 'Sen', sans-serif;
+
+.text-bold {
+  font-family: Quicksand-Bold, sans-serif;
+}
+.text-regular {
+  font-family: 'Quicksand-Regular', sans-serif;
+  font-weight: 400;
+}
+
+.text-light {
+  font-family: 'Quicksand-Light', sans-serif;
+  font-weight: 300;
+}
+
+.text-medium {
+  font-family: 'Quicksand-Medium', sans-serif;
+  font-weight: 500;
+}
+
+header {
+  font-family: $font-primary;
+}
+strong {
+  font-family: $font-primary;
+}
+body {
+  font-family: $font-primary;
+}
+h1 {
+  font-family: $font-primary;
+  font-weight: 700;
+}
+h2 {
+  font-family: $font-primary;
+  font-weight: 600;
+}
+p {
+  font-family: $font-primary;
+  font-weight: 400;
+}
+small {
+  font-family: $font-primary;
+  font-weight: 300;
+}
+em {
+  font-family: $font-secondary;
+  font-weight: 800;
+}

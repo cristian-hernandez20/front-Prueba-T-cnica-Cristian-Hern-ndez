@@ -1,0 +1,84 @@
+*,
+.desplace {
+  transition: transform 0.1s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+.desplace.botone {
+  transform: translateX(3px);
+}
+.botone {
+  position: relative;
+  transition: all 100ms;
+}
+.delay {
+  transition: all 100ms;
+}
+.botone:hover {
+  transform: translateY(-2px);
+  opacity: 1;
+}
+.botone:focus {
+  transform: translateY(-2px);
+  opacity: 1;
+}
+.desplace-r {
+  position: relative;
+  transition: all 200ms;
+}
+.desplace-r:hover {
+  transform: translateX(4px);
+  opacity: 1;
+}
+.desplace-r:focus {
+  transform: translateX(4px);
+  opacity: 1;
+}
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.zoomIt {
+  display: block !important;
+  -webkit-transition: -webkit-transform 0.5s ease-out;
+  -moz-transition: -moz-transform 0.5s ease-out;
+  -o-transition: -o-transform 0.5s ease-out;
+  -ms-transition: -ms-transform 0.5s ease-out;
+  transition: transform 0.5s ease-out;
+}
+.zoomIt:hover {
+  -moz-transform: scale(0.96);
+  -webkit-transform: scale(0.96);
+  -o-transform: scale(0.96);
+  -ms-transform: scale(0.96);
+  transform: scale(0.96);
+}
+.zoomIt:-moz-focus-inner {
+  -moz-transform: scale(0.96);
+  -webkit-transform: scale(0.96);
+  -o-transform: scale(0.96);
+  -ms-transform: scale(0.96);
+  transform: scale(0.96);
+}
+
+.sticky {
+  position: sticky;
+  top: 0px;
+  z-index: 10;
+}
+* {
+  font-weight: 300;
+}
+
+.text-ellipsis {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.background-cover {
+  background-image: url('@/assets/image/cover-b.webp');
+}
+::selection {
+  background: #123d7de5;
+  color: white;
+}
