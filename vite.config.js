@@ -19,7 +19,7 @@ export default defineConfig({
       BASE_URL: modulo,
       API: '/api/v1/',
       PORT_DEV: 5132,
-      PORT: 5131,
+      PORT: 5133,
     },
   },
   build: {
