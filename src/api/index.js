@@ -1,5 +1,5 @@
 import { default as axios } from 'axios';
-import {} from '@/store';
+import { useModuleLoader } from '@/store';
 
 const port = process.env.NODE_ENV == 'production' ? process.env.PORT : process.env.PORT_DEV;
 const getHeaders = () => ({
@@ -28,13 +28,16 @@ export const apiAxios = async ({
     },
   };
   try {
+    useModuleLoader().setLoader$(loader);
     const response = await axios(config);
     if (response.data?.msg?.status) {
       throw new Error(`Error http ${response.data.msg.status}`);
     }
-    return response.data.data;
+    return response.data;
   } catch (error) {
     handleAxiosError(error);
+  } finally {
+    useModuleLoader().setLoader$(false);
   }
 };
 

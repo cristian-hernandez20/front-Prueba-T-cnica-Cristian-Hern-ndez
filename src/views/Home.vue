@@ -2,11 +2,34 @@
   <Header></Header>
   <div class="roulette-table">
     <div class="roulette-wheel" :style="{ transform: `rotate(${rotation}deg)` }"></div>
-    <div class="button-container">
-      <q-btn label="Girar Ruleta" color="primary" @click="spinWheel" class="button" icon-right="cached" />
-      <q-btn label="Registrarte" color="secondary" @click="spinWheel" class="button" icon-right="groups" />
-    </div>
 
+    <q-slide-transition>
+      <div v-show="winningColor">
+        <div class="color-display" :class="`bg-${winningColor || 'accent'}`">
+          {{ winningNumber % 2 == 0 ? 'Numero par' : 'Numero impar' }}
+        </div>
+      </div>
+    </q-slide-transition>
+    <q-card class="row" style="width: 450px">
+      <Button_ class="col-6" label="Girar Ruleta" @click="spinWheel" icon-right="cached" />
+      <Button_ class="col-6" label="Registrarte" @click="spinWheel" icon-right="groups" color="accent" />
+      <Toggle_
+        class="col-6 text-white"
+        true-value="red"
+        false-value="black"
+        :class="evaluateColor"
+        v-model="selectedColor"
+        :label="evaluateLabelColor"
+      />
+      <Toggle_
+        color="accent"
+        class="col-6"
+        :true-value="true"
+        :false-value="false"
+        v-model="selectedEven"
+        :label="evaluateLabelisEven"
+      />
+    </q-card>
     <div class="board">
       <div v-for="(row, rowIndex) in boardNumbers" :key="rowIndex" class="row">
         <div
@@ -23,9 +46,12 @@
 </template>
 
 <script setup>
+import Button_ from '@/components/global/Button';
+import Toggle_ from '@/components/global/Toggle';
 import Header from '@/components/ui/Header';
+import { ref, computed } from 'vue';
 import { apiAxios } from '@/api';
-import { ref } from 'vue';
+import { Notify } from 'quasar';
 
 const boardNumbers = ref([
   [0],
@@ -36,7 +62,22 @@ const boardNumbers = ref([
 
 const selectedNumber = ref(null);
 const winningNumber = ref(null);
+const winningColor = ref(null);
 const rotation = ref(0);
+
+const selectedColor = ref(null);
+const selectedEven = ref(null);
+const userBet = ref({ betAmount: 20000 });
+
+const evaluateLabelisEven = computed(() => {
+  return { true: 'Numeros pares', false: 'Numeros impares' }[selectedEven.value] || 'Elije una opción';
+});
+const evaluateLabelColor = computed(() => {
+  return { red: 'Apostando al rojo', black: 'Apostando al negro' }[selectedColor.value] || 'Elije un color';
+});
+const evaluateColor = computed(() => {
+  return { red: 'bg-red', black: 'bg-black' }[selectedColor.value] || 'bg-accent';
+});
 
 const selectNumber = (number) => {
   selectedNumber.value = number;
@@ -55,15 +96,40 @@ const getCellWinner = (number) => {
 };
 
 const spinWheel = async () => {
-  const randomRotation = Math.floor(Math.random() * 360) + (rotation.value % 360) * 10; 
+  const randomRotation = Math.floor(Math.random() * 360) + (rotation.value % 360) * 10;
   rotation.value = randomRotation;
 
   winningNumber.value = null;
   try {
     const response = await apiAxios({ method: 'get', url: 'Result/ramdom-result' });
-    winningNumber.value = response.number;
+    winningNumber.value = response.data.number;
+    winningColor.value = response.data.color;
+    evaluateWinner(response.data);
   } catch (error) {
     console.error(error);
+    Notify.create({ caption: error.message, message: 'Atencion' });
+  }
+};
+const evaluateWinner = async (params) => {
+  try {
+    userBet.value.betAmount = userBet.value.betAmount - userBet.value.betAmount;
+    const response = await apiAxios({
+      method: 'post',
+      url: 'Result/validate-result',
+      params,
+      data: {
+        number: selectedNumber.value,
+        isEven: selectedEven.value,
+        color: selectedColor.value,
+        betAmount: userBet.value.betAmount,
+      },
+    });
+    userBet.value.betAmount = userBet.value.betAmount + response.data.reward;
+
+    Notify.create({ caption: response.message, message: 'Atencion' });
+  } catch (error) {
+    console.error(error);
+    Notify.create({ caption: error.message, message: 'Atencion' });
   }
 };
 </script>
@@ -258,5 +324,17 @@ const spinWheel = async () => {
     width: 150px;
     height: 150px;
   }
+}
+.color-display {
+  width: 150px;
+  height: 50px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: white;
+  margin: 10px;
+  transition: background-color 0.2s; /* Transición suave */
 }
 </style>
