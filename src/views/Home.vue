@@ -1,7 +1,6 @@
 <template>
   <div class="roulette-table">
     <div class="roulette-wheel" :style="{ transform: `rotate(${rotation}deg)` }"></div>
-
     <q-slide-transition>
       <div v-show="winningColor">
         <div style="border-radius: 4px" :class="`bg-${winningColor || 'accent'}`" class="text-white q-pa-sm">
@@ -11,7 +10,7 @@
     </q-slide-transition>
     <q-card class="row" style="width: 450px; border-radius: 0.8rem">
       <div class="col-12 q-py-md text-center">
-        <div class="q-ma-sm">
+        <div class="q-mb-sm q-mx-sm">
           <div class="row q-col-gutter-xs">
             <Subtitle_ class="col-12" text="Información requerida del usuario" icon="person_outline" />
             <q-input class="col-6" label="Nombre" v-model="userBet.name" dense filled />
@@ -66,7 +65,7 @@
       </div>
       <q-card-actions class="col-12 text-primary text-end" align="center">
         <Button_
-          label="Girar Ruleta"
+          label="Apostar"
           @click="spinWheel"
           icon-right="cached"
           class="botone q-mx-sm"
