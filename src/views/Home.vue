@@ -1,34 +1,79 @@
 <template>
-  <Header></Header>
   <div class="roulette-table">
     <div class="roulette-wheel" :style="{ transform: `rotate(${rotation}deg)` }"></div>
 
     <q-slide-transition>
       <div v-show="winningColor">
-        <div class="color-display" :class="`bg-${winningColor || 'accent'}`">
+        <div style="border-radius: 4px" :class="`bg-${winningColor || 'accent'}`" class="text-white q-pa-sm">
           {{ winningNumber % 2 == 0 ? 'Numero par' : 'Numero impar' }}
         </div>
       </div>
     </q-slide-transition>
-    <q-card class="row" style="width: 450px">
-      <Button_ class="col-6" label="Girar Ruleta" @click="spinWheel" icon-right="cached" />
-      <Button_ class="col-6" label="Registrarte" @click="spinWheel" icon-right="groups" color="accent" />
-      <Toggle_
-        class="col-6 text-white"
-        true-value="red"
-        false-value="black"
-        :class="evaluateColor"
-        v-model="selectedColor"
-        :label="evaluateLabelColor"
-      />
-      <Toggle_
-        color="accent"
-        class="col-6"
-        :true-value="true"
-        :false-value="false"
-        v-model="selectedEven"
-        :label="evaluateLabelisEven"
-      />
+    <q-card class="row" style="width: 450px; border-radius: 0.8rem">
+      <div class="col-12 q-py-md text-center">
+        <div class="q-ma-sm">
+          <div class="row q-col-gutter-xs">
+            <Subtitle_ class="col-12" text="Información requerida del usuario" icon="person_outline" />
+            <q-input class="col-6" label="Nombre" v-model="userBet.name" dense filled />
+            <q-input v-model="userBet.credit" label="Crédito" class="col-6" prefix="$" filled dense />
+            <div class="col-12 text-center">
+              <Button_
+                icon-right="price_change"
+                class="botone q-mx-sm"
+                label="Cargar saldo"
+                @click="getUser"
+                color="accent"
+                dense
+              />
+              <Button_
+                label="Guardar Usuario"
+                class="botone q-mx-sm"
+                @click="createUser"
+                icon-right="save"
+                color="green-10"
+                dense
+              />
+            </div>
+            <Subtitle_ class="col-12" text="Información de la apuesta" icon="receipt_long" />
+            <q-input
+              mask="###,###,###,###,###"
+              v-model="userBet.betAmount"
+              label="Valor apostado"
+              reverse-fill-mask
+              unmasked-value
+              class="col-8"
+              prefix="$"
+              filled
+              dense
+            />
+          </div>
+          <Toggle_
+            class="text-white"
+            true-value="red"
+            false-value="black"
+            :class="evaluateColor"
+            v-model="selectedColor"
+            :label="evaluateLabelColor"
+          />
+          <Toggle_
+            color="accent"
+            :true-value="true"
+            :false-value="false"
+            v-model="selectedEven"
+            :label="evaluateLabelisEven"
+          />
+        </div>
+      </div>
+      <q-card-actions class="col-12 text-primary text-end" align="center">
+        <Button_
+          label="Girar Ruleta"
+          @click="spinWheel"
+          icon-right="cached"
+          class="botone q-mx-sm"
+          :show_loader="true"
+        />
+        <Button_ label="limpiar jugada" @click="cleanPlay" icon-right="delete" class="botone q-mx-sm" color="red-10" />
+      </q-card-actions>
     </q-card>
     <div class="board">
       <div v-for="(row, rowIndex) in boardNumbers" :key="rowIndex" class="row">
@@ -48,8 +93,10 @@
 <script setup>
 import Button_ from '@/components/global/Button';
 import Toggle_ from '@/components/global/Toggle';
-import Header from '@/components/ui/Header';
-import { ref, computed } from 'vue';
+
+import Subtitle_ from '@/components/ui/Subtitle';
+
+import { ref, computed, watch } from 'vue';
 import { apiAxios } from '@/api';
 import { Notify } from 'quasar';
 
@@ -63,21 +110,62 @@ const boardNumbers = ref([
 const selectedNumber = ref(null);
 const winningNumber = ref(null);
 const winningColor = ref(null);
+const isNegative = ref(false);
 const rotation = ref(0);
 
 const selectedColor = ref(null);
 const selectedEven = ref(null);
-const userBet = ref({ betAmount: 20000 });
+const userBet = ref({
+  betAmount: null,
+  credit: null,
+  name: '',
+});
+
+watch(
+  () => selectedNumber.value,
+  (new_value) => new_value !== null && (selectedEven.value = null)
+);
+watch(
+  () => selectedEven.value,
+  (new_value) => new_value !== null && (selectedNumber.value = null)
+);
 
 const evaluateLabelisEven = computed(() => {
-  return { true: 'Numeros pares', false: 'Numeros impares' }[selectedEven.value] || 'Elije una opción';
+  return { true: 'Numeros pares', false: 'Numeros impares' }[selectedEven.value] || 'Elige una opción';
 });
 const evaluateLabelColor = computed(() => {
-  return { red: 'Apostando al rojo', black: 'Apostando al negro' }[selectedColor.value] || 'Elije un color';
+  return { red: 'Apostando al rojo', black: 'Apostando al negro' }[selectedColor.value] || 'Elige un color';
 });
 const evaluateColor = computed(() => {
   return { red: 'bg-red', black: 'bg-black' }[selectedColor.value] || 'bg-accent';
 });
+
+const getUser = async () => {
+  if (!validateRequiredProperty('name', 'Nombre de usuario')) return;
+
+  try {
+    const response = await apiAxios({ method: 'get', url: 'User/get-user', params: { name: userBet.value.name } });
+    Object.assign(userBet.value, response.data);
+    if (response.success == false) {
+      Notify.create({ caption: response.message, message: 'Atencion' });
+    }
+  } catch (error) {
+    console.error(error);
+    Notify.create({ caption: error.message, message: 'Atencion' });
+  }
+};
+const createUser = async () => {
+  if (!validateRequiredProperty('name', 'Nombre de usuario')) return;
+  if (!validateRequiredProperty('credit', 'Crédito')) return;
+
+  try {
+    const response = await apiAxios({ method: 'post', url: 'User/create-user', data: userBet.value });
+    Notify.create({ caption: response.message, message: 'Atencion' });
+  } catch (error) {
+    console.error(error);
+    Notify.create({ caption: error.message, message: 'Atencion' });
+  }
+};
 
 const selectNumber = (number) => {
   selectedNumber.value = number;
@@ -94,12 +182,36 @@ const getCellWinner = (number) => {
   if (number === 0) return 'zero';
   return number % 2 === 0 ? 'black' : 'red';
 };
+const cleanPlay = () => {
+  selectedNumber.value = null;
+  selectedColor.value = null;
+  selectedEven.value = null;
+};
+const isSpinValid = () => {
+  if (!validateRequiredProperty('name', 'Nombre de usuario')) return false;
+  if (!validateRequiredProperty('betAmount', 'Valor apostado')) return false;
+  if (!selectedColor.value && !selectedNumber.value && !selectedColor.value) {
+    Notify.create({ caption: 'Elige al menos una opción para iniciar el juego', message: 'Atención' });
+    return false;
+  }
+  return true;
+};
+const generateRandomRotation = () => {
+  const baseRotation = rotation.value % 360;
+  return Math.floor(Math.random() * 360) + baseRotation * 10;
+};
 
 const spinWheel = async () => {
-  const randomRotation = Math.floor(Math.random() * 360) + (rotation.value % 360) * 10;
-  rotation.value = randomRotation;
+  if (!isSpinValid()) return;
+  rotation.value = generateRandomRotation();
 
   winningNumber.value = null;
+  if (userBet.value.credit < userBet.value.betAmount) {
+    isNegative.value == true;
+  } else {
+    isNegative.value == false;
+  }
+  userBet.value.credit -= Number(userBet.value.betAmount);
   try {
     const response = await apiAxios({ method: 'get', url: 'Result/ramdom-result' });
     winningNumber.value = response.data.number;
@@ -112,25 +224,39 @@ const spinWheel = async () => {
 };
 const evaluateWinner = async (params) => {
   try {
-    userBet.value.betAmount = userBet.value.betAmount - userBet.value.betAmount;
     const response = await apiAxios({
       method: 'post',
       url: 'Result/validate-result',
       params,
       data: {
+        betAmount: userBet.value.betAmount,
         number: selectedNumber.value,
         isEven: selectedEven.value,
         color: selectedColor.value,
-        betAmount: userBet.value.betAmount,
       },
     });
-    userBet.value.betAmount = userBet.value.betAmount + response.data.reward;
-
-    Notify.create({ caption: response.message, message: 'Atencion' });
+    if (response.data.reward != 0) {
+      userBet.value.credit += Number(userBet.value.betAmount) + Number(response.data.reward);
+      Notify.create({ caption: response.message, message: 'Atencion', iconColor: 'green' });
+    } else {
+      Notify.create({
+        caption: `Has perdido el monto apostado, tu saldo es de ${userBet.value.credit}`,
+        message: 'Atencion',
+        iconColor: 'red',
+      });
+    }
   } catch (error) {
     console.error(error);
     Notify.create({ caption: error.message, message: 'Atencion' });
   }
+};
+
+const validateRequiredProperty = (nameProperty, nameLabel) => {
+  if (!userBet.value[nameProperty]) {
+    Notify.create({ caption: `${nameLabel} es requerido para iniciar el juego`, message: 'Atencion' });
+    return false;
+  }
+  return true;
 };
 </script>
 
@@ -230,7 +356,7 @@ const evaluateWinner = async (params) => {
   justify-content: center;
   align-items: center;
   width: 100%;
-  height: 50vh;
+  height: 45vh;
   background-color: #006400;
   padding: 10px;
   border-radius: 10px;
@@ -324,17 +450,5 @@ const evaluateWinner = async (params) => {
     width: 150px;
     height: 150px;
   }
-}
-.color-display {
-  width: 150px;
-  height: 50px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  color: white;
-  margin: 10px;
-  transition: background-color 0.2s; /* Transición suave */
 }
 </style>
